@@ -1,0 +1,88 @@
+/* Hedgerow Digital — design tokens.
+   Section 8 of DESIGN.md is the source of truth. Anything added beyond that
+   file is marked "addition" with the reason. Do not invent colours here. */
+
+:root {
+  /* Core */
+  --visited-link: #9933ff;
+  --dialup-midnight: #330066;
+  --guestbook-paper: #e1e8d5;
+  --websafe-mint: #ccffcc;
+  --tooltip-cream: #ffffcc;
+  /* Supporting */
+  --frameset: #d4dcc6;
+  --under-construction: #ffcc00;
+  --hit-counter: #ff6633;
+  --status-bar: #666666;
+
+  /* Semantic */
+  --bg: var(--guestbook-paper);
+  --surface: var(--frameset);
+  --text: var(--dialup-midnight);
+  --muted: var(--status-bar);
+  --accent: var(--visited-link);
+  --focus: var(--under-construction);
+  --rule: rgb(51 0 102 / 0.2);
+
+  /* Type */
+  --font-display: 'modulator-text-vf', sans-serif;
+  --font-serif: 'gelica', Georgia, 'Times New Roman', serif;
+  --font-sans: 'objektiv-mk1', system-ui, sans-serif;
+
+  /* Shape */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --shadow-hard-sm: 3px 3px 0 var(--dialup-midnight);
+  --shadow-hard-md: 6px 6px 0 var(--dialup-midnight);
+
+  /* --- Additions beyond DESIGN.md section 8 --- */
+
+  /* Addition: the light half of the beveled <hr> groove. The web 1.0 details
+     demo uses a dark line over a light one; without a token the light line
+     cannot flip for dark mode. */
+  --bevel-light: rgb(255 255 255 / 0.75);
+  --bevel-dark: rgb(51 0 102 / 0.45);
+
+  /* Addition: 88x31 badge chrome, and the hit-counter box. Taken from the
+     demo's inline styles so components do not hard-code them. */
+  --badge-bevel: #bbbbbb;
+  --counter-bg: #000000;
+  --counter-ink: var(--under-construction);
+
+  /* Addition: layout measures from DESIGN.md section 5, expressed as tokens. */
+  --measure-page: 68rem;
+  --measure-read: 40rem;
+  --gutter: 1.25rem;
+
+  /* Addition: monospace stack for counters, filenames and the sitemap.
+     DESIGN.md calls for "monospace" without naming a stack. */
+  --font-mono: 'Courier New', Courier, monospace;
+
+  /* Addition: serif stack for the Apache-style directory listing, which is
+     deliberately Times, not Gelica. */
+  --font-directory: 'Times New Roman', Times, serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #1e0a3c;
+    --surface: #2a1250;
+    --text: #ffffcc;
+    --muted: #c9c3d9;
+    --accent: #c58cff;
+    --rule: rgb(255 255 204 / 0.2);
+    --bevel-light: rgb(255 255 204 / 0.25);
+    --bevel-dark: rgb(0 0 0 / 0.5);
+  }
+}
+
+:root[data-theme='dark'] {
+  --bg: #1e0a3c;
+  --surface: #2a1250;
+  --text: #ffffcc;
+  --muted: #c9c3d9;
+  --accent: #c58cff;
+  --rule: rgb(255 255 204 / 0.2);
+  --bevel-light: rgb(255 255 204 / 0.25);
+  --bevel-dark: rgb(0 0 0 / 0.5);
+}

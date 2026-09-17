@@ -1,0 +1,320 @@
+/* Hedgerow Digital — global styles.
+   Type scale, colour pairings and signature details all follow DESIGN.md.
+   Component-specific CSS lives with its component; this file is the baseline. */
+
+@import './tokens.css';
+
+/* ---------- Reset ---------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--bg);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 1.125rem;
+  line-height: 1.65;
+  overflow-x: clip;
+}
+
+img,
+svg,
+video {
+  max-width: 100%;
+}
+
+img,
+video {
+  height: auto;
+}
+
+/* ---------- Layout ---------- */
+
+.wrap {
+  max-width: var(--measure-page);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* Reading columns cap at ~70 characters per DESIGN.md section 3. */
+.measure {
+  max-width: var(--measure-read);
+}
+
+.section {
+  padding-block: 3.5rem;
+}
+
+/* ---------- Type scale (DESIGN.md section 3) ---------- */
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-serif);
+  text-wrap: pretty;
+  margin: 0;
+}
+
+h1 {
+  font-weight: 600;
+  font-size: clamp(2.2rem, 4.5vw, 3.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+}
+
+h2 {
+  font-weight: 600;
+  font-size: 2.5rem;
+  line-height: 1.1;
+}
+
+h3 {
+  font-weight: 500;
+  font-size: 1.75rem;
+  line-height: 1.2;
+}
+
+/* H4 is sans, not serif — card and list titles. */
+h4,
+h5,
+h6 {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 1.25rem;
+  line-height: 1.3;
+  margin: 0;
+  text-wrap: pretty;
+}
+
+p {
+  margin: 0 0 1rem;
+  text-wrap: pretty;
+}
+
+/* Display: Modulator Text VF — a UNICASE face. Its lowercase letters are
+   drawn at cap height and carry the brand's forms (e = rounded ε, w = ω),
+   which is what the logo uses. Never apply text-transform: uppercase here:
+   that swaps in the conventional uppercase glyphs and breaks the match.
+   The kit's copy has no wght axis, only wdth (0-150, default 100). */
+.display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-variation-settings: 'wdth' 100;
+  letter-spacing: 0.06em;
+  font-size: clamp(2.6rem, 6vw, 4.5rem);
+  line-height: 1;
+  color: var(--accent);
+}
+
+.tagline {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1.75rem;
+  line-height: 1.3;
+  color: var(--accent);
+  text-wrap: pretty;
+}
+
+.small,
+.caption {
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+/* ---------- Links ---------- */
+
+a {
+  color: var(--accent);
+  text-underline-offset: 0.15em;
+}
+
+/* Visited stays violet — it is the brand's namesake. */
+a:visited {
+  color: var(--accent);
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+/* ---------- Web 1.0 starter set ---------- */
+
+/* Selection: Under Construction yellow on Dial-Up Midnight. */
+::selection {
+  background: var(--under-construction);
+  color: var(--dialup-midnight);
+}
+
+/* Beveled rule: a dark line over a light one, like an old <hr>. */
+hr {
+  border: 0;
+  height: 0;
+  border-top: 1px solid var(--bevel-dark);
+  border-bottom: 1px solid var(--bevel-light);
+  margin: 0;
+}
+
+/* Pixel art must never be smoothed. */
+.px {
+  image-rendering: pixelated;
+  shape-rendering: crispEdges;
+  display: inline-block;
+  flex: none;
+}
+
+/* ---------- Rendered Markdown ---------- */
+
+.prose {
+  max-width: var(--measure-read);
+}
+
+.prose > * + * {
+  margin-top: 1.25rem;
+}
+
+.prose h2 {
+  font-size: 1.9rem;
+  line-height: 1.15;
+  margin-top: 2.5rem;
+}
+
+.prose h3 {
+  font-size: 1.4rem;
+  margin-top: 2rem;
+}
+
+.prose p,
+.prose li {
+  text-wrap: pretty;
+}
+
+.prose ul,
+.prose ol {
+  padding-left: 1.5rem;
+  margin-block: 0;
+}
+
+.prose li + li {
+  margin-top: 0.6rem;
+}
+
+.prose blockquote {
+  margin: 1.5rem 0;
+  padding: 0 0 0 1.5rem;
+  border-left: 3px solid var(--accent);
+}
+
+.prose blockquote p {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.75rem;
+  line-height: 1.3;
+  color: var(--accent);
+  margin: 0;
+}
+
+.prose code {
+  font-family: var(--font-mono);
+  font-size: 0.95em;
+}
+
+/* Wide tables scroll inside their own box; the page never scrolls sideways.
+   width:fit-content keeps the border hugging the cells — with width:100% the
+   border stretches past the content on a narrow table. */
+.prose table {
+  display: block;
+  overflow-x: auto;
+  border-collapse: collapse;
+  width: fit-content;
+  max-width: 100%;
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  border: 2px solid var(--dialup-midnight);
+  border-radius: var(--radius-sm);
+}
+
+.prose thead {
+  background: var(--dialup-midnight);
+  color: var(--tooltip-cream);
+}
+
+.prose th,
+.prose td {
+  padding: 0.55rem 1rem;
+  text-align: left;
+}
+
+.prose tbody tr {
+  border-top: 1px solid var(--rule);
+  background: var(--surface);
+}
+
+.prose tbody tr:nth-child(odd) {
+  background: var(--bg);
+}
+
+.prose img {
+  border: 2px solid var(--dialup-midnight);
+  border-radius: var(--radius-md);
+}
+
+/* ---------- Tables (case studies, field notes) ---------- */
+
+.table-scroll {
+  overflow-x: auto;
+  border: 2px solid var(--dialup-midnight);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.table-scroll table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 32rem;
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- Utilities ---------- */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
