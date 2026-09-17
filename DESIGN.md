@@ -85,7 +85,7 @@ Fonts are served from an Adobe Fonts web kit:
 
 | Role | Family (CSS name) | Use |
 |---|---|---|
-| **Display / wordmark** | Modulator Text VF — `"modulator-text-vf"` | Logo lockups and rare hero moments only. Uppercase, tracked. |
+| **Display / wordmark** | Modulator Text VF — `"modulator-text-vf"` | Logo lockups and rare hero moments only. **Unicase — type it as "Hedgerow", never `text-transform: uppercase`.** Tracked. |
 | **Serif** | Gelica — `"gelica"` | Headlines, tagline, pull quotes. Weights 200–900 with italics. |
 | **Sans** | Objektiv Mk1 — `"objektiv-mk1"` | Body, UI, buttons, card titles, captions. Weights 200–900 with italics. |
 
@@ -101,13 +101,22 @@ Also in the kit: `modulator-vf` (non-Text Modulator, available for wordmark comp
 
 Georgia is the fallback on purpose: it was the serif of the Web 1.0 era.
 
-**Modulator weight:** the kit declares Modulator Text VF at weight 400 only. Set heavy weights with `font-variation-settings: "wght" 900;` and keep `font-weight: 400`, or the browser will fake a bold.
+**Modulator is unicase.** Its lowercase letters are drawn at cap height and carry the brand's distinctive forms: `e` renders as a rounded **ε**, `w` as a rounded **ω**. These are the letterforms in the logo. Set the wordmark as `Hedgerow` and **never apply `text-transform: uppercase`** — that substitutes the conventional uppercase glyphs and the wordmark stops matching the icon.
+
+**Modulator has no weight axis.** Verified against the kit's font files (September 2026):
+
+| Family | Axes | CSS weight |
+|---|---|---|
+| `modulator-text-vf` | `wdth` 0–150, default **100** ("Narrow") — the logo's width | 400 |
+| `modulator-vf` | `wght` 25–**500**, default 100 | 25 |
+
+So `font-variation-settings: "wght" 900` on `modulator-text-vf` is a silent no-op: there is no such axis. Adjust the display face with `"wdth"` instead. On `modulator-vf` the weight axis stops at 500, and the face turns wide and heavy well before that — it is not a drop-in bold for the wordmark.
 
 ### Type scale
 
 | Style | Font | Size / line-height | Notes |
 |---|---|---|---|
-| Display | Modulator Text VF, wght 900 | clamp(2.6rem, 6vw, 4.5rem) / 1 | Uppercase, `letter-spacing: .06em`, Visited Link |
+| Display | Modulator Text VF, `wdth` 100 | clamp(2.6rem, 6vw, 4.5rem) / 1 | Unicase (no `text-transform`), `letter-spacing: .06em`, Visited Link |
 | H1 | Gelica 600 | clamp(2.2rem, 4.5vw, 3.5rem) / 1.05 | One per page |
 | H2 | Gelica 600 | 2.5rem / 1.1 | Section titles |
 | H3 | Gelica 500 | 1.75rem / 1.2 | Subsections |
@@ -119,7 +128,7 @@ Georgia is the fallback on purpose: it was the serif of the Web 1.0 era.
 
 ### Type rules
 
-- Sentence case for headings and buttons. No all-caps labels (the wordmark is the only uppercase element).
+- Sentence case for headings and buttons. No all-caps labels (the wordmark is the only element that reads as uppercase, and it gets there through Modulator's unicase letterforms, not `text-transform`).
 - Don't emphasize a single word in a headline with a color or italic swap.
 - No eyebrow labels above headings unless they carry real information.
 - Serif does the talking in headlines, sans does the work everywhere else. Don't set body copy in Gelica.
