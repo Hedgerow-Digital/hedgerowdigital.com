@@ -1,0 +1,96 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/Button.astro';
+import PixelIcon from '../components/PixelIcon.astro';
+import { nav } from '../data/site';
+---
+
+<BaseLayout
+  title="Page not found"
+  description="That page is not here. Here is the way back."
+  noindex={true}
+>
+  <section class="section notfound">
+    <p class="code">404</p>
+    <h1>That page is not here.</h1>
+    <p class="measure">
+      The link may be old, or we may have moved something without leaving a
+      trail. Neither is your fault. Here is everything there is:
+    </p>
+
+    <ul class="routes">
+      {
+        nav.map((item) => (
+          <li>
+            <a href={item.href}>
+              <PixelIcon name={item.icon} size={20} />
+              {item.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="actions">
+      <Button href="/">Back to the home page</Button>
+      <a href="/sitemap/">Or read the full index</a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .notfound {
+    padding-block: 4rem 5rem;
+  }
+
+  /* The one early-web wink on this page. */
+  .code {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 0.15em;
+    background: var(--counter-bg);
+    color: var(--counter-ink);
+    border: 2px inset #999;
+    padding: 0.15rem 0.45rem;
+    display: inline-block;
+    margin: 0 0 1.25rem;
+  }
+
+  h1 {
+    margin-bottom: 1rem;
+  }
+
+  .routes {
+    list-style: none;
+    margin: 2rem 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+    gap: 1rem;
+    max-width: 44rem;
+  }
+
+  .routes a {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: var(--text);
+    font-weight: 600;
+    border: 2px solid var(--dialup-midnight);
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    padding: 0.8rem 1rem;
+  }
+
+  .routes a:hover {
+    text-decoration: underline;
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem 1.5rem;
+    flex-wrap: wrap;
+  }
+</style>

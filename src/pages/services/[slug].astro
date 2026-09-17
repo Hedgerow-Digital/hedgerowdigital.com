@@ -1,0 +1,184 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Button from '../../components/Button.astro';
+import PixelIcon from '../../components/PixelIcon.astro';
+import { site } from '../../data/site';
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const services = await getCollection('services');
+  return services.map((service) => ({
+    params: { slug: service.id },
+    props: { service },
+  }));
+};
+
+/** getStaticPaths props are not inferred into Astro.props — declare them. */
+interface Props {
+  service: CollectionEntry<'services'>;
+}
+
+const { service } = Astro.props;
+const { Content } = await render(service);
+
+const all = (await getCollection('services')).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+const others = all.filter((s) => s.id !== service.id);
+---
+
+<BaseLayout
+  title={service.data.title}
+  description={service.data.summary}
+  updated={service.data.updated}
+>
+  <section class="head">
+    <p class="crumb small">
+      <a href="/services/">Services</a> / {service.data.title}
+    </p>
+
+    <div class="head__grid">
+      <div>
+        <h1>{service.data.title}</h1>
+        <p class="measure lede">{service.data.summary}</p>
+      </div>
+
+      <div class="price">
+        <PixelIcon name={service.data.icon} size={40} />
+        {
+          service.data.price ? (
+            <p class="price__figure">{service.data.price}</p>
+          ) : (
+            <p class="price__figure price__figure--tbd">Priced per project</p>
+          )
+        }
+        {/* Never lowercase the title — it turns "AI Visibility Audit" into
+            "ai visibility audit". Sentence case comes from the leading word. */}
+        <Button href={`mailto:${site.email}?subject=${encodeURIComponent(service.data.title)}`}>
+          Ask about the {service.data.title}
+        </Button>
+      </div>
+    </div>
+  </section>
+
+  <hr />
+
+  <section class="section">
+    <div class="prose">
+      <Content />
+    </div>
+  </section>
+
+  <hr />
+
+  <section class="section">
+    <h2>Other services</h2>
+    <ul class="others">
+      {
+        others.map((other) => (
+          <li>
+            <a href={`/services/${other.id}/`}>
+              <PixelIcon name={other.data.icon} size={20} />
+              {other.data.title}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</BaseLayout>
+
+<style>
+  .head {
+    padding: 3.5rem 0 3rem;
+  }
+
+  .crumb {
+    margin-bottom: 1rem;
+  }
+
+  .crumb a {
+    color: var(--muted);
+  }
+
+  .head__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+    gap: 2rem 4rem;
+    align-items: end;
+  }
+
+  .head h1 {
+    margin-bottom: 1.5rem;
+  }
+
+  .lede {
+    font-size: 1.25rem;
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  /* Cream price card, literal colours in both themes. */
+  .price {
+    border: 2px solid var(--dialup-midnight);
+    background: var(--tooltip-cream);
+    color: var(--dialup-midnight);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-hard-md);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    align-items: flex-start;
+    max-width: 22rem;
+    width: 100%;
+    justify-self: end;
+  }
+
+  .price__figure {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: 2.25rem;
+    line-height: 1;
+    margin: 0;
+  }
+
+  .price__figure--tbd {
+    font-size: 1.5rem;
+  }
+
+  .others {
+    list-style: none;
+    margin: 1.5rem 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+    gap: 1rem;
+  }
+
+  .others a {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: var(--text);
+    font-weight: 600;
+    border: 2px solid var(--dialup-midnight);
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    padding: 0.8rem 1rem;
+  }
+
+  .others a:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 45rem) {
+    .price {
+      justify-self: stretch;
+      max-width: none;
+    }
+  }
+</style>

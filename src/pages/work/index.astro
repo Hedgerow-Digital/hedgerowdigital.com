@@ -1,0 +1,102 @@
+---
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const work = (await getCollection('work')).sort((a, b) => b.data.year - a.data.year);
+
+const updated = work
+  .map((w) => w.data.updated)
+  .filter((d): d is Date => d instanceof Date)
+  .sort((a, b) => b.getTime() - a.getTime())[0];
+---
+
+<BaseLayout
+  title="Work"
+  description="Selected projects, written up plainly — including what we would do differently."
+  updated={updated}
+>
+  <section class="section">
+    <h1>Work</h1>
+    <p class="measure lede">
+      A few projects, written up plainly. Each one says what the problem was,
+      what changed, and what we would do differently.
+    </p>
+  </section>
+
+  {
+    work.length === 0 ? (
+      <p class="measure">No case studies published yet.</p>
+    ) : (
+      <div class="grid">
+        {work.map((entry) => (
+          <article class="item">
+            <a class="item__link" href={`/work/${entry.id}/`}>
+              <Image
+                src={entry.data.cover}
+                alt={entry.data.coverAlt}
+                width={560}
+                height={420}
+                class="item__cover"
+              />
+              <h2 class="item__title">{entry.data.title}</h2>
+            </a>
+            <p class="small item__meta">
+              {entry.data.client ?? 'Studio project'} &middot; {entry.data.year}
+            </p>
+            <p class="item__summary">{entry.data.summary}</p>
+          </article>
+        ))}
+      </div>
+    )
+  }
+</BaseLayout>
+
+<style>
+  .lede {
+    font-size: 1.25rem;
+    line-height: 1.5;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+    gap: 2.5rem;
+    padding-bottom: 3.5rem;
+  }
+
+  .item__link {
+    text-decoration: none;
+    color: var(--text);
+    display: block;
+  }
+
+  .item__cover {
+    width: 100%;
+    height: auto;
+    border: 2px solid var(--dialup-midnight);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-hard-md);
+    display: block;
+  }
+
+  .item__title {
+    font-size: 1.75rem;
+    margin: 1.25rem 0 0.35rem;
+  }
+
+  .item__link:hover .item__title {
+    text-decoration: underline;
+  }
+
+  .item__meta {
+    margin: 0 0 0.5rem;
+  }
+
+  .item__summary {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.55;
+  }
+</style>

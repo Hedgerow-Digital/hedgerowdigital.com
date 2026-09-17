@@ -1,0 +1,85 @@
+---
+import { getEntry, render } from 'astro:content';
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/Button.astro';
+import { site } from '../data/site';
+
+const page = await getEntry('pages', 'about');
+if (!page) throw new Error('src/content/pages/about.md is missing.');
+const { Content } = await render(page);
+---
+
+<BaseLayout
+  title="About"
+  description={page.data.description}
+  updated={page.data.updated}
+>
+  <section class="head">
+    <h1>{page.data.title}</h1>
+  </section>
+
+  <div class="prose body">
+    <Content />
+  </div>
+
+  <section class="section">
+    <div class="callout">
+      <div>
+        <h2>Say hello.</h2>
+        <p class="measure">
+          A note about what you are working on is plenty.
+        </p>
+      </div>
+      <div class="callout__actions">
+        <Button href={`mailto:${site.email}`}>Email the studio</Button>
+        <a href="/services/">Or start with a service</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .head {
+    padding: 3.5rem 0 2rem;
+  }
+
+  .head h1 {
+    max-width: 52rem;
+  }
+
+  .body {
+    padding-bottom: 3.5rem;
+  }
+
+  .callout {
+    border: 2px solid var(--dialup-midnight);
+    background: var(--tooltip-cream);
+    color: var(--dialup-midnight);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-hard-md);
+    padding: 2.25rem 2rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+    gap: 1.5rem 3rem;
+    align-items: center;
+  }
+
+  .callout h2 {
+    font-size: 2.25rem;
+    margin-bottom: 0.75rem;
+  }
+
+  /* Excluding .btn matters: a primary button here is violet-on-violet
+     otherwise, and its label disappears. */
+  .callout a:not(.btn) {
+    color: var(--visited-link);
+  }
+
+  .callout__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+</style>

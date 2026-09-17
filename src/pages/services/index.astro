@@ -1,0 +1,112 @@
+---
+import { getCollection } from 'astro:content';
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PixelIcon from '../../components/PixelIcon.astro';
+import Button from '../../components/Button.astro';
+import { site } from '../../data/site';
+
+const services = (await getCollection('services')).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+
+/** Newest content change across the collection, for the footer stamp. */
+const updated = services
+  .map((s) => s.data.updated)
+  .filter((d): d is Date => d instanceof Date)
+  .sort((a, b) => b.getTime() - a.getTime())[0];
+---
+
+<BaseLayout
+  title="Services"
+  description={`What ${site.name} does: ${services.map((s) => s.data.title).join(', ')}.`}
+  updated={updated}
+>
+  <section class="section">
+    <h1>Services</h1>
+    <p class="measure lede">
+      Four services, each sized to what a small team can actually keep up.
+      Start with an audit if you are not sure which one you need.
+    </p>
+  </section>
+
+  <div class="list">
+    {
+      services.map((service) => (
+        <article class="item">
+          <div class="item__icon">
+            <PixelIcon name={service.data.icon} size={48} />
+          </div>
+
+          <div class="item__body">
+            <h2>
+              <a href={`/services/${service.id}/`}>{service.data.title}</a>
+            </h2>
+            <p class="measure">{service.data.summary}</p>
+            {service.data.price && <p class="small">{service.data.price}</p>}
+          </div>
+
+          <div class="item__action">
+            {/* Not .toLowerCase() — it would render "ai visibility audit". */}
+            <Button variant="secondary" href={`/services/${service.id}/`}>
+              Read about the {service.data.title}
+            </Button>
+          </div>
+        </article>
+      ))
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .lede {
+    font-size: 1.25rem;
+    line-height: 1.5;
+  }
+
+  .list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .item {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 1rem 2rem;
+    align-items: start;
+    padding: 2rem 0;
+    border-top: 1px solid var(--rule);
+  }
+
+  .item:last-child {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .item h2 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .item h2 a {
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .item h2 a:hover {
+    text-decoration: underline;
+  }
+
+  .item__action {
+    align-self: center;
+  }
+
+  @media (max-width: 52rem) {
+    .item {
+      grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .item__action {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

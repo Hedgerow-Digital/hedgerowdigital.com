@@ -1,0 +1,85 @@
+---
+import { getEntry, render } from 'astro:content';
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/Button.astro';
+import PixelIcon from '../components/PixelIcon.astro';
+import { site, social } from '../data/site';
+
+const page = await getEntry('pages', 'contact');
+if (!page) throw new Error('src/content/pages/contact.md is missing.');
+const { Content } = await render(page);
+---
+
+<BaseLayout
+  title="Contact"
+  description={page.data.description}
+  updated={page.data.updated}
+>
+  <section class="head">
+    <h1>{page.data.title}</h1>
+
+    <div class="actions">
+      <Button href={`mailto:${site.email}`}>Email the studio</Button>
+      <p class="small address">
+        <PixelIcon name="envelope" size={16} />
+        <a href={`mailto:${site.email}`}>{site.email}</a>
+      </p>
+    </div>
+  </section>
+
+  <div class="prose body">
+    <Content />
+  </div>
+
+  {
+    social.length > 0 && (
+      <section class="section elsewhere">
+        <h2>Elsewhere</h2>
+        <ul>
+          {social.map((link) => (
+            <li>
+              <a href={link.href} rel="me">
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+</BaseLayout>
+
+<style>
+  .head {
+    padding: 3.5rem 0 2rem;
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem 1.5rem;
+    flex-wrap: wrap;
+    margin-top: 1.75rem;
+  }
+
+  .address {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0;
+  }
+
+  .body {
+    padding-bottom: 2rem;
+  }
+
+  .elsewhere ul {
+    list-style: none;
+    margin: 1rem 0 0;
+    padding: 0;
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+</style>
