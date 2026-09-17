@@ -1,0 +1,79 @@
+---
+/**
+ * Button. Renders an <a> when given href, otherwise a <button>.
+ *
+ * Labels say exactly what happens ("Book an audit", not "Submit"), sentence
+ * case, no arrow glyphs — DESIGN.md section 5.
+ */
+
+interface Props {
+  href?: string;
+  variant?: 'primary' | 'secondary';
+  type?: 'button' | 'submit' | 'reset';
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  href,
+  variant = 'primary',
+  type = 'button',
+  class: className,
+  ...rest
+} = Astro.props;
+
+const Tag = href ? 'a' : 'button';
+const tagProps = href ? { href } : { type };
+---
+
+<Tag class:list={['btn', `btn--${variant}`, className]} {...tagProps} {...rest}>
+  <slot />
+</Tag>
+
+<style>
+  .btn {
+    display: inline-block;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 1rem;
+    line-height: 1.2;
+    padding: 0.7rem 1.2rem;
+    border-radius: var(--radius-sm);
+    border: 2px solid var(--dialup-midnight);
+    box-shadow: var(--shadow-hard-sm);
+    text-decoration: none;
+    cursor: pointer;
+    text-align: center;
+  }
+
+  /* Cream on Visited Link — 4.8:1, approved for buttons. */
+  .btn--primary,
+  .btn--primary:visited {
+    background: var(--visited-link);
+    color: var(--tooltip-cream);
+  }
+
+  /* Midnight on Paper — 12.5:1. */
+  .btn--secondary,
+  .btn--secondary:visited {
+    background: var(--guestbook-paper);
+    color: var(--dialup-midnight);
+  }
+
+  .btn:hover {
+    text-decoration: none;
+  }
+
+  /* Presses into its own hard shadow, like 90s interface chrome. */
+  .btn:active {
+    transform: translate(3px, 3px);
+    box-shadow: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn:active {
+      transform: none;
+      box-shadow: var(--shadow-hard-sm);
+    }
+  }
+</style>

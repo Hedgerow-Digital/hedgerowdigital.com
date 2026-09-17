@@ -1,0 +1,112 @@
+---
+/**
+ * Site header: pixel-H wordmark and the pixel-icon nav.
+ *
+ * No hamburger. The nav wraps to a second line on narrow screens, which is
+ * five links' worth of content and costs no JavaScript.
+ */
+import PixelIcon from './PixelIcon.astro';
+import { site, nav } from '../data/site';
+
+interface Props {
+  /** Pathname of the current page, used for aria-current. */
+  pathname: string;
+}
+
+const { pathname } = Astro.props;
+
+/** A nav item is current if it matches, or if it is the section root. */
+function isCurrent(href: string): boolean {
+  if (href === '/') return pathname === '/';
+  return pathname === href || pathname.startsWith(href);
+}
+---
+
+<header class="masthead">
+  <a class="wordmark" href="/">
+    <PixelIcon name="favicon" size={28} />
+    {site.name.split(' ')[0]}
+  </a>
+
+  <nav aria-label="Main">
+    {
+      nav.map((item) => (
+        <a
+          href={item.href}
+          aria-current={isCurrent(item.href) ? 'page' : undefined}
+        >
+          <PixelIcon name={item.icon} size={18} />
+          {item.label}
+        </a>
+      ))
+    }
+  </nav>
+</header>
+
+<style>
+  .masthead {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem 1.5rem;
+    padding: 1.25rem 0;
+    flex-wrap: wrap;
+  }
+
+  /* Modulator Text VF is UNICASE: its lowercase letters are drawn at cap
+     height with the brand's distinctive forms (e renders as a rounded ε,
+     w as a rounded ω) — the letterforms in the logo.
+     Do NOT add text-transform: uppercase. That substitutes the conventional
+     uppercase glyphs and the wordmark stops matching the icon.
+     The kit's copy of this font has no wght axis either — only wdth
+     (0-150, default 100 "Narrow"), which is the width the logo uses. */
+  .wordmark {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-variation-settings: 'wdth' 100;
+    letter-spacing: 0.06em;
+    font-size: 1.6rem;
+    line-height: 1;
+    color: var(--accent);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  nav {
+    display: flex;
+    gap: 0.5rem 1.4rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  nav a {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    text-decoration: none;
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  nav a:hover {
+    text-decoration: underline;
+  }
+
+  nav a[aria-current='page'] {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+  }
+
+  @media (max-width: 30rem) {
+    .masthead {
+      gap: 0.75rem;
+    }
+
+    nav {
+      gap: 0.4rem 1rem;
+      font-size: 0.9375rem;
+    }
+  }
+</style>

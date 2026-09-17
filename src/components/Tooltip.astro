@@ -1,0 +1,71 @@
+---
+/**
+ * Cream tooltip for jargon, in the old Windows style.
+ *
+ * Keyboard accessible: the term is focusable and points at the bubble with
+ * aria-describedby, so screen readers announce the definition whether or not
+ * the bubble is visible.
+ */
+
+interface Props {
+  /** The definition shown in the bubble. */
+  text: string;
+  id?: string;
+}
+
+const { text, id } = Astro.props;
+const tooltipId = id ?? `tt-${Math.random().toString(36).slice(2, 9)}`;
+---
+
+<span class="tip">
+  <span class="tip__term" tabindex="0" aria-describedby={tooltipId}>
+    <slot />
+  </span>
+  <span class="tt" role="tooltip" id={tooltipId}>{text}</span>
+</span>
+
+<style>
+  .tip {
+    position: relative;
+    display: inline-block;
+  }
+
+  .tip__term {
+    border-bottom: 1px dotted currentColor;
+    cursor: help;
+  }
+
+  /* Midnight on Cream — 15:1, and it stays literal in dark mode on purpose:
+     a cream tooltip is the point. */
+  .tt {
+    position: absolute;
+    left: 0;
+    top: calc(100% + 6px);
+    z-index: 5;
+    width: max-content;
+    max-width: min(16rem, calc(100vw - 3rem));
+    background: var(--tooltip-cream);
+    color: var(--dialup-midnight);
+    border: 1px solid var(--dialup-midnight);
+    padding: 0.2rem 0.45rem;
+    font-size: 0.8125rem;
+    line-height: 1.35;
+    font-weight: 400;
+    font-style: normal;
+    box-shadow: 2px 2px 0 rgb(51 0 102 / 0.35);
+    visibility: hidden;
+  }
+
+  .tip:hover .tt,
+  .tip:focus-within .tt {
+    visibility: visible;
+  }
+
+  /* Near the right edge on narrow screens, flip the bubble's anchor. */
+  @media (max-width: 40rem) {
+    .tt {
+      left: auto;
+      right: 0;
+    }
+  }
+</style>

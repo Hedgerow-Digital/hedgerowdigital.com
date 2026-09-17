@@ -1,0 +1,138 @@
+---
+/**
+ * The only layout. Owns <head>, the masthead, the colophon, and the two
+ * inline scripts that have to run before paint or on every page.
+ */
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { site, defaultOgImage } from '../data/site';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Overrides the derived canonical. Use for paginated or aliased routes. */
+  canonical?: string | undefined;
+  ogImage?: string | undefined;
+  ogType?: 'website' | 'article';
+  /** Renders the footer stamp. Resolved by src/lib/last-updated.ts. */
+  updated?: Date | undefined;
+  publishedTime?: Date | undefined;
+  noindex?: boolean;
+}
+
+const {
+  title,
+  description,
+  canonical,
+  ogImage = defaultOgImage,
+  ogType = 'website',
+  updated,
+  publishedTime,
+  noindex = false,
+} = Astro.props;
+
+/** The home page title is the brand alone; everything else is suffixed. */
+const isHome = Astro.url.pathname === '/';
+const fullTitle = isHome ? `${site.name} · ${site.tagline}` : `${title} · ${site.name}`;
+
+const canonicalUrl = canonical ?? new URL(Astro.url.pathname, site.url).href;
+const ogImageUrl = new URL(ogImage, site.url).href;
+---
+
+<!doctype html>
+<!--
+
+      .-~~~-.   .-~~~-.   .-~~~-.   .-~~~-.   .-~~~-.
+     (   @   ) (  @    ) (    @  ) (   @   ) (  @    )
+      `-._.-'   `-._.-'   `-._.-'   `-._.-'   `-._.-'
+   ~~~~~~|~~~~~~~~~|~~~~~~~~~|~~~~~~~~~|~~~~~~~~~|~~~~~~~
+
+   HEDGEROW DIGITAL
+   Cultivating digital work that matters.
+
+   Hello, fellow source-viewer.
+   You like to see how things are made. So do we.
+   Say hi: hello@hedgerowdigital.com
+
+-->
+<html lang={site.lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="theme-color" content="#E1E8D5" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1E0A3C" media="(prefers-color-scheme: dark)" />
+
+    <!-- Adobe Fonts kit: Modulator Text VF, Gelica, Objektiv Mk1. -->
+    <link rel="preconnect" href="https://use.typekit.net" crossorigin />
+    <link rel="preconnect" href="https://p.typekit.net" crossorigin />
+    <link rel="stylesheet" href="https://use.typekit.net/wde0fbj.css" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:locale" content="en_US" />
+    {publishedTime && (
+      <meta property="article:published_time" content={publishedTime.toISOString()} />
+    )}
+    {updated && (
+      <meta property="article:modified_time" content={updated.toISOString()} />
+    )}
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+
+    <!-- Applies a stored theme before first paint. Must stay inline. -->
+    <script is:inline>
+      (function () {
+        try {
+          var stored = localStorage.getItem('hedgerow-theme');
+          if (stored === 'light' || stored === 'dark') {
+            document.documentElement.setAttribute('data-theme', stored);
+          }
+        } catch (e) {
+          /* Site data blocked. The system preference still applies. */
+        }
+      })();
+    </script>
+
+    <slot name="head" />
+  </head>
+
+  <body>
+    <div class="wrap">
+      <Header pathname={Astro.url.pathname} />
+      <hr />
+
+      <main id="main">
+        <slot />
+      </main>
+
+      <hr />
+      <Footer updated={updated} />
+    </div>
+
+    <!-- For the console-openers. -->
+    <script is:inline>
+      console.log(
+        '%c HEDGEROW DIGITAL %c\nCultivating digital work that matters.\n\nHello, fellow console-opener. You like to see how things are made. So do we.\nSay hi: hello@hedgerowdigital.com',
+        'background:#9933FF;color:#FFFFCC;font-weight:bold;font-size:14px;padding:4px 8px;border:2px solid #330066',
+        'color:#9933FF;font-size:12px',
+      );
+    </script>
+  </body>
+</html>

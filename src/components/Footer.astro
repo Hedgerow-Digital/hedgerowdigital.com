@@ -1,0 +1,163 @@
+---
+/**
+ * Site footer: 88x31 badges, the "last updated" stamp, a mailto to the
+ * webmaster, and the theme control.
+ */
+import Badge88 from './Badge88.astro';
+import PixelIcon from './PixelIcon.astro';
+import Timestamp from './Timestamp.astro';
+import { site, badges } from '../data/site';
+
+interface Props {
+  /** Resolved upstream; omitted on pages with no meaningful date. */
+  updated?: Date | undefined;
+}
+
+const { updated } = Astro.props;
+const year = new Date().getUTCFullYear();
+---
+
+<footer class="colophon">
+  <div class="colophon__badges" aria-label="Badges">
+    {badges.map((badge) => <Badge88 {...badge} />)}
+  </div>
+
+  <div class="colophon__meta">
+    <p class="colophon__line">
+      <span>&copy; {year} {site.name}</span>
+      <a class="mail" href={`mailto:${site.email}`}>
+        <PixelIcon name="envelope" size={16} />
+        Email the webmaster
+      </a>
+    </p>
+
+    <p class="colophon__line">
+      {updated && <Timestamp date={updated} />}
+      <button class="theme" type="button" data-theme-toggle>
+        <PixelIcon name="monitor" size={14} />
+        Theme: <span data-theme-label>system</span>
+      </button>
+    </p>
+  </div>
+</footer>
+
+<script>
+  type ThemeChoice = 'system' | 'light' | 'dark';
+
+  const STORAGE_KEY = 'hedgerow-theme';
+  const ORDER: ThemeChoice[] = ['system', 'light', 'dark'];
+
+  const button = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
+  const label = document.querySelector<HTMLElement>('[data-theme-label]');
+
+  function read(): ThemeChoice {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored === 'light' || stored === 'dark') return stored;
+    } catch {
+      // Private browsing, or site data blocked. System it is.
+    }
+    return 'system';
+  }
+
+  function syncLabel(choice: ThemeChoice): void {
+    if (label) label.textContent = choice;
+    button?.setAttribute('aria-label', `Colour theme: ${choice}. Activate to change.`);
+  }
+
+  function apply(choice: ThemeChoice): void {
+    if (choice === 'system') {
+      document.documentElement.removeAttribute('data-theme');
+    } else {
+      document.documentElement.setAttribute('data-theme', choice);
+    }
+    syncLabel(choice);
+  }
+
+  // The inline script in <head> already set the attribute before paint. Only
+  // the label needs catching up — touching data-theme here would clobber any
+  // value the server rendered.
+  syncLabel(read());
+
+  button?.addEventListener('click', () => {
+    const next = ORDER[(ORDER.indexOf(read()) + 1) % ORDER.length]!;
+    try {
+      if (next === 'system') localStorage.removeItem(STORAGE_KEY);
+      else localStorage.setItem(STORAGE_KEY, next);
+    } catch {
+      // Not persisted, but still applied for this page view.
+    }
+    apply(next);
+  });
+</script>
+
+<style>
+  .colophon {
+    padding: 2rem 0 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1.25rem 2rem;
+    flex-wrap: wrap;
+  }
+
+  .colophon__badges {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .colophon__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    align-items: flex-end;
+  }
+
+  .colophon__line {
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--muted);
+    display: flex;
+    gap: 0.5rem 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  .mail {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .theme {
+    font: inherit;
+    font-size: 0.9375rem;
+    color: var(--muted);
+    background: none;
+    border: 0;
+    padding: 0.1rem 0.2rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    border-radius: 2px;
+  }
+
+  .theme:hover {
+    color: var(--text);
+    text-decoration: underline;
+  }
+
+  @media (max-width: 45rem) {
+    .colophon__meta {
+      align-items: flex-start;
+    }
+
+    .colophon__line {
+      justify-content: flex-start;
+    }
+  }
+</style>

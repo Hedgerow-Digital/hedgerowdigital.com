@@ -1,0 +1,175 @@
+---
+/**
+ * Webring-style prev / all / next bar for the end of a case study or note.
+ *
+ * Ends of the ring render as muted text rather than dead links, so keyboard
+ * users never tab to something that goes nowhere.
+ */
+import PixelIcon from './PixelIcon.astro';
+import type { PixelIconName } from '../data/pixel-icons';
+
+export interface RingLink {
+  href: string;
+  title: string;
+}
+
+interface Props {
+  prev?: RingLink | undefined;
+  next?: RingLink | undefined;
+  allHref: string;
+  allLabel: string;
+  /** Icon for the centre cell. */
+  allIcon?: PixelIconName;
+  /** Accessible name for the whole bar. */
+  label: string;
+  prevLabel?: string;
+  nextLabel?: string;
+  endOfRingLabel?: string;
+}
+
+const {
+  prev,
+  next,
+  allHref,
+  allLabel,
+  allIcon = 'page',
+  label,
+  prevLabel = 'Previous',
+  nextLabel = 'Next',
+  endOfRingLabel = 'End of the ring',
+} = Astro.props;
+---
+
+<nav class="ring" aria-label={label}>
+  {
+    prev ? (
+      <a class="ring__side ring__side--prev" href={prev.href}>
+        <PixelIcon name="arrowL" size={20} class="ring__arrow" />
+        <span class="ring__kicker">{prevLabel}</span>
+        <span class="ring__title">{prev.title}</span>
+      </a>
+    ) : (
+      <span class="ring__side ring__side--prev ring__side--empty">
+        <span class="ring__kicker">{prevLabel}</span>
+        <span class="ring__title">{endOfRingLabel}</span>
+      </span>
+    )
+  }
+
+  <a class="ring__all" href={allHref}>
+    <PixelIcon name={allIcon} size={18} />
+    {allLabel}
+  </a>
+
+  {
+    next ? (
+      <a class="ring__side ring__side--next" href={next.href}>
+        <span class="ring__kicker">{nextLabel}</span>
+        <PixelIcon name="arrowR" size={20} class="ring__arrow" />
+        <span class="ring__title">{next.title}</span>
+      </a>
+    ) : (
+      <span class="ring__side ring__side--next ring__side--empty">
+        <span class="ring__kicker">{nextLabel}</span>
+        <span class="ring__title">{endOfRingLabel}</span>
+      </span>
+    )
+  }
+</nav>
+
+<style>
+  .ring {
+    border: 2px solid var(--dialup-midnight);
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+    align-items: stretch;
+    overflow: hidden;
+  }
+
+  .ring__side {
+    display: grid;
+    gap: 0.25rem 0.9rem;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    text-decoration: none;
+    color: var(--text);
+  }
+
+  .ring__side--prev {
+    grid-template-columns: auto minmax(0, 1fr);
+    border-right: 1px solid var(--rule);
+  }
+
+  .ring__side--next {
+    grid-template-columns: minmax(0, 1fr) auto;
+    text-align: right;
+  }
+
+  .ring__side--prev :global(.ring__arrow),
+  .ring__side--next :global(.ring__arrow) {
+    grid-row: span 2;
+  }
+
+  .ring__kicker {
+    font-size: 0.8125rem;
+    color: var(--muted);
+  }
+
+  .ring__title {
+    font-weight: 600;
+    font-size: 1rem;
+    line-height: 1.35;
+    text-wrap: pretty;
+  }
+
+  /* With no arrow to span two rows, an end-of-ring cell would collapse onto
+     one line. Force the same stacked shape as a linked cell. */
+  .ring__side--empty {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ring__side--empty .ring__title {
+    color: var(--muted);
+    font-weight: 400;
+    font-style: italic;
+  }
+
+  .ring__all {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem 1.25rem;
+    text-decoration: none;
+    color: var(--text);
+    font-weight: 600;
+    font-size: 0.9375rem;
+    text-align: center;
+    border-right: 1px solid var(--rule);
+  }
+
+  .ring a:hover .ring__title,
+  .ring__all:hover {
+    text-decoration: underline;
+  }
+
+  /* Once the cells stack, the vertical divider becomes a horizontal one. */
+  @media (max-width: 45rem) {
+    .ring__side--prev,
+    .ring__all {
+      border-right: 0;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .ring__side--next {
+      text-align: left;
+      grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .ring__side--next :global(.ring__arrow) {
+      order: -1;
+    }
+  }
+</style>

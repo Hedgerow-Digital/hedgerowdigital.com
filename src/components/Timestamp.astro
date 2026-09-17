@@ -1,0 +1,43 @@
+---
+/**
+ * "Last updated" stamp. Always renders a machine-readable datetime.
+ *
+ * The date is resolved upstream (frontmatter, then git, then build time) —
+ * this component only formats it. See src/lib/last-updated.ts.
+ */
+import { site } from '../data/site';
+
+interface Props {
+  date: Date;
+  /** Text before the date. Pass "" for a bare date. */
+  label?: string;
+  class?: string;
+}
+
+const { date, label = 'Last updated', class: className } = Astro.props;
+
+const formatted = new Intl.DateTimeFormat(site.locale, {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  timeZone: 'UTC',
+}).format(date);
+
+const machine = date.toISOString().slice(0, 10);
+---
+
+<span class:list={['stamp', className]}>
+  {label && <>{label}{' '}</>}<time datetime={machine}>{formatted}</time>
+</span>
+
+<style>
+  .stamp {
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--muted);
+  }
+
+  time {
+    font-variant-numeric: tabular-nums;
+  }
+</style>

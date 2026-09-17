@@ -1,0 +1,50 @@
+---
+/**
+ * An 88x31 badge. Footer only, and only claims that are true.
+ * Beveled borders are allowed here and nowhere else (DESIGN.md section 6).
+ */
+import type { Badge } from '../data/site';
+
+interface Props extends Badge {
+  href?: string;
+}
+
+const { lines, background, color, title, href } = Astro.props;
+const Tag = href ? 'a' : 'span';
+---
+
+<Tag
+  class="b88"
+  style={`background:${background};color:${color}`}
+  title={title}
+  {...href ? { href } : {}}
+>
+  {lines[0]}<br />{lines[1]}
+</Tag>
+
+<style>
+  .b88 {
+    width: 88px;
+    height: 31px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-family: var(--font-sans);
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: 0.02em;
+    border: 2px outset var(--badge-bevel);
+    text-decoration: none;
+    flex: none;
+  }
+
+  a.b88:hover {
+    text-decoration: none;
+  }
+
+  a.b88:active {
+    border-style: inset;
+  }
+</style>

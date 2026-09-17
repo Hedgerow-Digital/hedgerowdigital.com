@@ -1,0 +1,94 @@
+---
+/**
+ * A captioned image in 90s window chrome: title bar with a filename, the
+ * image, then a caption. Featured images only — DESIGN.md section 6 allows
+ * one early-web wink per page.
+ *
+ * Pass the image itself as the default slot so callers control <Image />,
+ * <img>, or inline SVG.
+ */
+
+interface Props {
+  /** Shown in the title bar. The filename can double as a playful caption. */
+  filename: string;
+  caption?: string;
+  class?: string;
+}
+
+const { filename, caption, class: className } = Astro.props;
+---
+
+<figure class:list={['win', className]}>
+  <div class="win__bar">
+    <span class="win__name">{filename}</span>
+    <span class="win__btns" aria-hidden="true">
+      <span></span><span></span>
+    </span>
+  </div>
+  <div class="win__body">
+    <slot />
+  </div>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<style>
+  .win {
+    margin: 0;
+    border: 2px solid var(--dialup-midnight);
+    background: var(--surface);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-hard-md);
+  }
+
+  /* The title bar keeps literal brand colours in both themes — it is chrome,
+     not page surface. Cream on Midnight is 15:1. */
+  .win__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    background: var(--dialup-midnight);
+    color: var(--tooltip-cream);
+    font-size: 0.8125rem;
+    padding: 0.2rem 0.3rem 0.2rem 0.55rem;
+  }
+
+  .win__name {
+    font-family: var(--font-mono);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .win__btns {
+    display: flex;
+    gap: 3px;
+    flex: none;
+  }
+
+  .win__btns span {
+    width: 14px;
+    height: 14px;
+    background: var(--frameset);
+    border: 1px solid;
+    border-color: #fff var(--dialup-midnight) var(--dialup-midnight) #fff;
+    display: block;
+  }
+
+  .win__body :global(img),
+  .win__body :global(svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  figcaption {
+    font-size: 0.875rem;
+    line-height: 1.5;
+    padding: 0.45rem 0.65rem;
+    border-top: 1px solid var(--dialup-midnight);
+    color: var(--text);
+    background: var(--surface);
+  }
+</style>
