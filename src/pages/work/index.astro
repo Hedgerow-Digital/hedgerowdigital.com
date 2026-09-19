@@ -3,12 +3,12 @@ import { getCollection } from 'astro:content';
 import { Image } from 'astro:assets';
 
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { resolveUpdated } from '../../lib/last-updated';
 
 const work = (await getCollection('work')).sort((a, b) => b.data.year - a.data.year);
 
 const updated = work
-  .map((w) => w.data.updated)
-  .filter((d): d is Date => d instanceof Date)
+  .map((w) => resolveUpdated(w.data.updated, w.filePath))
   .sort((a, b) => b.getTime() - a.getTime())[0];
 ---
 

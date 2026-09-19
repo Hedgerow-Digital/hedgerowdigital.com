@@ -6,6 +6,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Button from '../../components/Button.astro';
 import PixelIcon from '../../components/PixelIcon.astro';
 import { site } from '../../data/site';
+import { resolveUpdated } from '../../lib/last-updated';
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const services = await getCollection('services');
@@ -32,7 +33,7 @@ const others = all.filter((s) => s.id !== service.id);
 <BaseLayout
   title={service.data.title}
   description={service.data.summary}
-  updated={service.data.updated}
+  updated={resolveUpdated(service.data.updated, service.filePath)}
 >
   <section class="head">
     <p class="crumb small">

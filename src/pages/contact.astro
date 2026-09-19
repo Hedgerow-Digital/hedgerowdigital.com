@@ -5,6 +5,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Button from '../components/Button.astro';
 import PixelIcon from '../components/PixelIcon.astro';
 import { site, social } from '../data/site';
+import { resolveUpdated } from '../lib/last-updated';
 
 const page = await getEntry('pages', 'contact');
 if (!page) throw new Error('src/content/pages/contact.md is missing.');
@@ -14,7 +15,7 @@ const { Content } = await render(page);
 <BaseLayout
   title="Contact"
   description={page.data.description}
-  updated={page.data.updated}
+  updated={resolveUpdated(page.data.updated, page.filePath)}
 >
   <section class="head">
     <h1>{page.data.title}</h1>

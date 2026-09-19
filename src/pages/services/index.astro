@@ -5,6 +5,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import PixelIcon from '../../components/PixelIcon.astro';
 import Button from '../../components/Button.astro';
 import { site } from '../../data/site';
+import { resolveUpdated } from '../../lib/last-updated';
 
 const services = (await getCollection('services')).sort(
   (a, b) => a.data.order - b.data.order,
@@ -12,8 +13,7 @@ const services = (await getCollection('services')).sort(
 
 /** Newest content change across the collection, for the footer stamp. */
 const updated = services
-  .map((s) => s.data.updated)
-  .filter((d): d is Date => d instanceof Date)
+  .map((s) => resolveUpdated(s.data.updated, s.filePath))
   .sort((a, b) => b.getTime() - a.getTime())[0];
 ---
 

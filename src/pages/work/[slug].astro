@@ -7,6 +7,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import WindowFrame from '../../components/WindowFrame.astro';
 import WebRing from '../../components/WebRing.astro';
 import Timestamp from '../../components/Timestamp.astro';
+import { resolveUpdated } from '../../lib/last-updated';
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const work = (await getCollection('work')).sort((a, b) => b.data.year - a.data.year);
@@ -36,7 +37,7 @@ const { Content } = await render(entry);
 <BaseLayout
   title={entry.data.title}
   description={entry.data.summary}
-  updated={entry.data.updated}
+  updated={resolveUpdated(entry.data.updated, entry.filePath)}
   ogType="article"
 >
   <article>
@@ -49,7 +50,7 @@ const { Content } = await render(entry);
       <p class="small meta">
         <span>{entry.data.client ?? 'Studio project'}</span>
         <span>{entry.data.year}</span>
-        {entry.data.updated && <Timestamp date={entry.data.updated} />}
+        <Timestamp date={resolveUpdated(entry.data.updated, entry.filePath)} />
       </p>
     </header>
 
