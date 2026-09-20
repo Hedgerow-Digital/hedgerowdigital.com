@@ -1,0 +1,169 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Timestamp from '../../components/Timestamp.astro';
+import PixelIcon from '../../components/PixelIcon.astro';
+import { getFieldNotes, noteDate, sanityConfig } from '../../lib/sanity';
+import { site } from '../../data/site';
+
+const notes = await getFieldNotes();
+
+const newest = notes
+  .map(noteDate)
+  .filter((d): d is Date => d instanceof Date)
+  .sort((a, b) => b.getTime() - a.getTime())[0];
+---
+
+<BaseLayout
+  title="Field notes"
+  description={`Research, working notes, and opinions from ${site.name}.`}
+  updated={newest}
+>
+  <section class="section">
+    <div class="head">
+      <h1>Field notes</h1>
+      <a class="feed" href="/rss.xml">
+        <PixelIcon name="page" size={16} />
+        RSS
+      </a>
+    </div>
+    <p class="measure lede">
+      Research, working notes, and the occasional opinion. Written by people,
+      dated honestly, and corrected in public when we get something wrong.
+    </p>
+  </section>
+
+  {
+    notes.length === 0 ? (
+      <section class="section empty">
+        <div class="empty__box">
+          <h2>Nothing published yet.</h2>
+          <p class="measure">
+            Field notes are written in Sanity, and this build found no published
+            posts in <code>{sanityConfig.projectId}/{sanityConfig.dataset}</code>.
+            When the first one is published, it appears here and in the feed
+            without a code change.
+          </p>
+          <p class="measure small">
+            If you expected posts, check that they are published rather than
+            drafts, and that <code>SANITY_PROJECT_ID</code> and{' '}
+            <code>SANITY_DATASET</code> are set in the build environment.
+          </p>
+        </div>
+      </section>
+    ) : (
+      <div class="notes">
+        {notes.map((note) => {
+          const date = noteDate(note);
+          return (
+            <a class="note" href={`/field-notes/${note.slug}/`}>
+              <span class="note__date small">
+                {date ? <Timestamp date={date} label="" /> : 'Undated'}
+              </span>
+              <span class="note__text">
+                <span class="note__title">{note.title}</span>
+                {note.excerpt && <span class="note__excerpt">{note.excerpt}</span>}
+              </span>
+            </a>
+          );
+        })}
+      </div>
+    )
+  }
+</BaseLayout>
+
+<style>
+  .head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .feed {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 600;
+    font-size: 0.9375rem;
+  }
+
+  .lede {
+    font-size: 1.25rem;
+    line-height: 1.5;
+    margin-top: 1rem;
+  }
+
+  .notes {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 3.5rem;
+  }
+
+  .note {
+    display: grid;
+    grid-template-columns: minmax(0, 9rem) minmax(0, 1fr);
+    gap: 0.25rem 2rem;
+    padding: 1.4rem 0;
+    border-top: 1px solid var(--rule);
+    text-decoration: none;
+    color: var(--text);
+  }
+
+  .note:last-child {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .note__date {
+    padding-top: 0.35rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .note__text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .note__title {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: 1.6rem;
+    line-height: 1.2;
+    text-wrap: pretty;
+  }
+
+  .note:hover .note__title {
+    text-decoration: underline;
+  }
+
+  .note__excerpt {
+    font-size: 1rem;
+    line-height: 1.5;
+    text-wrap: pretty;
+  }
+
+  .empty__box {
+    border: 2px solid var(--dialup-midnight);
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    padding: 2rem;
+    max-width: 44rem;
+  }
+
+  .empty__box h2 {
+    font-size: 1.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  code {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+  }
+
+  @media (max-width: 45rem) {
+    .note {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

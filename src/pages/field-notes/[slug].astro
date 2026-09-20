@@ -1,0 +1,168 @@
+---
+import type { GetStaticPaths } from 'astro';
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PortableText from '../../components/PortableText.astro';
+import WindowFrame from '../../components/WindowFrame.astro';
+import WebRing from '../../components/WebRing.astro';
+import Timestamp from '../../components/Timestamp.astro';
+import { getFieldNotes, noteDate, type FieldNote } from '../../lib/sanity';
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const notes = await getFieldNotes();
+
+  // No posts means no routes. The index still renders its empty state.
+  return notes.map((note, index) => ({
+    params: { slug: note.slug },
+    props: {
+      note,
+      // Newest first, so "previous" is the newer neighbour.
+      prev: notes[index - 1],
+      next: notes[index + 1],
+    },
+  }));
+};
+
+interface Props {
+  note: FieldNote;
+  prev?: FieldNote | undefined;
+  next?: FieldNote | undefined;
+}
+
+const { note, prev, next } = Astro.props;
+const published = noteDate(note);
+
+const description =
+  note.seo?.description ?? note.excerpt ?? `A field note from Hedgerow Digital.`;
+---
+
+<BaseLayout
+  title={note.seo?.title ?? note.title}
+  description={description}
+  ogType="article"
+  publishedTime={published}
+  updated={published}
+>
+  <article>
+    <header class="head">
+      <p class="crumb small"><a href="/field-notes/">Field notes</a></p>
+
+      <h1>{note.title}</h1>
+      {note.excerpt && <p class="measure lede">{note.excerpt}</p>}
+
+      <p class="small meta">
+        {note.author?.name && <span>By {note.author.name}</span>}
+        {published && (
+          <span>
+            Published <Timestamp date={published} label="" />
+          </span>
+        )}
+        {note.tags && note.tags.length > 0 && <span>{note.tags.join(' · ')}</span>}
+      </p>
+    </header>
+
+    {
+      note.cover?.url && (
+        <WindowFrame
+          filename={note.cover.url.split('/').pop()?.split('?')[0] ?? 'cover.jpg'}
+          caption={note.cover.caption ?? undefined}
+          class="cover"
+        >
+          <img src={note.cover.url} alt={note.cover.alt ?? ''} />
+        </WindowFrame>
+      )
+    }
+
+    <PortableText blocks={note.body} class="body" />
+
+    {
+      note.author?.bio && (
+        <footer class="byline">
+          <p class="byline__name">{note.author.name}</p>
+          <p class="byline__bio">{note.author.bio}</p>
+        </footer>
+      )
+    }
+  </article>
+
+  <hr />
+
+  <section class="section">
+    <WebRing
+      label="Field notes"
+      allHref="/field-notes/"
+      allLabel="All field notes"
+      allIcon="page"
+      prevLabel="Newer"
+      nextLabel="Older"
+      endOfRingLabel="End of the ring"
+      prev={prev ? { href: `/field-notes/${prev.slug}/`, title: prev.title } : undefined}
+      next={next ? { href: `/field-notes/${next.slug}/`, title: next.title } : undefined}
+    />
+  </section>
+</BaseLayout>
+
+<style>
+  .head {
+    padding: 3.5rem 0 2.5rem;
+    max-width: 48rem;
+  }
+
+  .crumb {
+    margin-bottom: 1rem;
+  }
+
+  .crumb a {
+    color: var(--muted);
+  }
+
+  .head h1 {
+    margin-bottom: 1.25rem;
+  }
+
+  .lede {
+    font-family: var(--font-serif);
+    font-size: 1.4rem;
+    line-height: 1.4;
+    margin: 0 0 1.25rem;
+  }
+
+  .meta {
+    display: flex;
+    gap: 0.5rem 1.5rem;
+    flex-wrap: wrap;
+    margin: 0;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--rule);
+  }
+
+  :global(.cover) {
+    margin-bottom: 3rem;
+    max-width: 48rem;
+  }
+
+  :global(.body) {
+    padding-bottom: 2rem;
+  }
+
+  .byline {
+    border: 2px solid var(--dialup-midnight);
+    background: var(--tooltip-cream);
+    color: var(--dialup-midnight);
+    border-radius: var(--radius-sm);
+    padding: 1.25rem 1.5rem;
+    max-width: var(--measure-read);
+    margin-bottom: 3.5rem;
+  }
+
+  .byline__name {
+    font-weight: 700;
+    margin: 0 0 0.25rem;
+  }
+
+  .byline__bio {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.55;
+  }
+</style>

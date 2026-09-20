@@ -1,0 +1,86 @@
+---
+/**
+ * Renders Sanity portable text as HTML, styled by the existing .prose rules.
+ *
+ * Deliberately small: blocks, headings, blockquotes, lists, links, inline
+ * decorators and images. Anything it does not recognise is skipped rather than
+ * rendered as raw JSON.
+ */
+import PortableTextSpans from './PortableTextSpans.astro';
+import WindowFrame from './WindowFrame.astro';
+import {
+  groupBlocks,
+  blockTag,
+  type PortableTextBlock,
+} from '../lib/portable-text';
+
+interface Props {
+  blocks: PortableTextBlock[] | null | undefined;
+  class?: string;
+}
+
+const { blocks, class: className } = Astro.props;
+const nodes = groupBlocks(blocks ?? []);
+
+/** Filename shown in an image's window-frame title bar. */
+function filenameFor(url: string | undefined): string {
+  if (!url) return 'image.png';
+  const last = url.split('/').pop();
+  return last?.split('?')[0] || 'image.png';
+}
+---
+
+<div class:list={['prose', className]}>
+  {
+    nodes.map((node) => {
+      if (node.kind === 'list') {
+        const ListTag = node.listItem === 'number' ? 'ol' : 'ul';
+        return (
+          <ListTag>
+            {node.items.map((item) => (
+              <li>
+                <PortableTextSpans block={item} />
+              </li>
+            ))}
+          </ListTag>
+        );
+      }
+
+      const { block } = node;
+
+      // Images come through the query flattened to url/alt/caption.
+      if (block._type === 'image') {
+        if (!block.url) return null;
+        return (
+          <WindowFrame
+            filename={filenameFor(block.url)}
+            caption={block.caption ?? undefined}
+          >
+            <img src={block.url} alt={block.alt ?? ''} loading="lazy" />
+          </WindowFrame>
+        );
+      }
+
+      if (block._type !== 'block') return null;
+
+      const Tag = blockTag(block);
+
+      // A blockquote needs a paragraph inside it for .prose to style it.
+      if (Tag === 'blockquote') {
+        return (
+          <blockquote>
+            <p>
+              <PortableTextSpans block={block} />
+            </p>
+          </blockquote>
+        );
+      }
+
+      return (
+        <Tag>
+          <PortableTextSpans block={block} />
+        </Tag>
+      );
+    })
+  }
+</div>

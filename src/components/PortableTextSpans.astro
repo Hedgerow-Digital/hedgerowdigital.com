@@ -1,0 +1,45 @@
+---
+/**
+ * The inline half of the portable-text renderer: spans, their decorators, and
+ * links. Split out so both paragraphs and list items can use it.
+ */
+import { resolveMarks, type PortableTextBlock } from '../lib/portable-text';
+
+interface Props {
+  block: PortableTextBlock;
+}
+
+const { block } = Astro.props;
+const spans = block.children ?? [];
+---
+
+{
+  spans.map((span) => {
+    const text = span.text ?? '';
+    if (!text) return null;
+
+    const { decorators, href } = resolveMarks(span, block.markDefs);
+
+    // Compose decorators from the inside out, then wrap in a link last.
+    let node: unknown = text;
+    if (decorators.includes('code')) node = <code>{node}</code>;
+    if (decorators.includes('em')) node = <em>{node}</em>;
+    if (decorators.includes('strong')) node = <strong>{node}</strong>;
+    if (decorators.includes('underline')) node = <u>{node}</u>;
+    if (decorators.includes('strike-through')) node = <s>{node}</s>;
+
+    if (href) {
+      const external = /^https?:\/\//i.test(href);
+      return (
+        <a
+          href={href}
+          rel={external ? 'noopener noreferrer' : undefined}
+        >
+          {node}
+        </a>
+      );
+    }
+
+    return node;
+  })
+}
