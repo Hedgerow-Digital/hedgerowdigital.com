@@ -42,7 +42,6 @@ export const site = {
 } as const;
 
 export const nav: NavItem[] = [
-  { label: 'Work', href: '/work/', icon: 'monitor' },
   { label: 'Services', href: '/services/', icon: 'magnifier' },
   { label: 'Field notes', href: '/field-notes/', icon: 'page' },
   { label: 'About', href: '/about/', icon: 'sprout' },
@@ -78,6 +77,12 @@ export const social: SocialLink[] = [
   // TODO: confirm the real LinkedIn company page slug before launch.
   { label: 'LinkedIn', href: 'https://www.linkedin.com/company/hedgerow-digital' },
 ];
+
+/**
+ * Product surfaced at the end of every field note. Set to null to show none.
+ * Must match a filename in src/content/products/.
+ */
+export const defaultProductSlug: string | null = 'ai-visibility-audit';
 
 /** Default Open Graph image. Generated in a later phase. */
 export const defaultOgImage = '/og-default.png';

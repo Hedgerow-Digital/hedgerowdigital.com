@@ -1,0 +1,56 @@
+---
+import { getCollection } from 'astro:content';
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import { resolveUpdated } from '../../lib/last-updated';
+import { site } from '../../data/site';
+
+const products = (await getCollection('products')).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+
+const updated = products
+  .map((p) => resolveUpdated(p.data.updated, p.filePath))
+  .sort((a, b) => b.getTime() - a.getTime())[0];
+---
+
+<BaseLayout
+  title="Products"
+  description={`Fixed-price, fixed-scope work from ${site.name}.`}
+  updated={updated}
+>
+  <section class="section">
+    <h1>Products</h1>
+    <p class="measure lede">
+      Packaged work with a price and a finish line, rather than an open-ended
+      engagement. Each one stands on its own.
+    </p>
+  </section>
+
+  {
+    products.length === 0 ? (
+      <p class="measure">No products published yet.</p>
+    ) : (
+      <div class="list">
+        {products.map((product) => (
+          <ProductCard product={product} variant="feature" class="list__item" />
+        ))}
+      </div>
+    )
+  }
+</BaseLayout>
+
+<style>
+  .lede {
+    font-size: 1.25rem;
+    line-height: 1.5;
+  }
+
+  .list {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding-bottom: 3.5rem;
+  }
+</style>

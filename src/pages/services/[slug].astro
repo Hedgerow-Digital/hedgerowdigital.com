@@ -5,6 +5,7 @@ import { getCollection, render, type CollectionEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Button from '../../components/Button.astro';
 import PixelIcon from '../../components/PixelIcon.astro';
+import ProductCard from '../../components/ProductCard.astro';
 import { site } from '../../data/site';
 import { resolveUpdated } from '../../lib/last-updated';
 
@@ -28,6 +29,18 @@ const all = (await getCollection('services')).sort(
   (a, b) => a.data.order - b.data.order,
 );
 const others = all.filter((s) => s.id !== service.id);
+
+/** Optional cross-link to a packaged product. */
+const relatedSlug = service.data.relatedProduct;
+const related = relatedSlug
+  ? (await getCollection('products')).find((p) => p.id === relatedSlug)
+  : undefined;
+if (relatedSlug && !related) {
+  throw new Error(
+    `${service.id}.mdx sets relatedProduct: "${relatedSlug}", but no such ` +
+      `file exists in src/content/products/.`,
+  );
+}
 ---
 
 <BaseLayout
@@ -70,6 +83,7 @@ const others = all.filter((s) => s.id !== service.id);
     <div class="prose">
       <Content />
     </div>
+    {related && <ProductCard product={related} variant="inline" />}
   </section>
 
   <hr />

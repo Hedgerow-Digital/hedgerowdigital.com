@@ -1,0 +1,213 @@
+---
+/**
+ * A product, rendered wherever one needs surfacing — the home page, a service
+ * page, the end of a field note.
+ *
+ * Two variants:
+ *   feature — the big cream panel with price and CTA (home page)
+ *   inline  — a compact bordered box for mid-page cross-references
+ *
+ * Products have no navigation item by design, so this component is how people
+ * find them. Keep it linkable from anywhere.
+ */
+import type { CollectionEntry } from 'astro:content';
+import Button from './Button.astro';
+import PixelIcon from './PixelIcon.astro';
+import { site } from '../data/site';
+
+interface Props {
+  product: CollectionEntry<'products'>;
+  variant?: 'feature' | 'inline';
+  /** Overrides the product's own intro, for context-specific framing. */
+  blurb?: string | undefined;
+  class?: string;
+}
+
+const { product, variant = 'feature', blurb, class: className } = Astro.props;
+const { title, summary, icon, price, priceNote, availability, ctaLabel, ctaHref, moreLabel, kicker } =
+  product.data;
+
+const kickerText = kicker ?? 'Product';
+
+const href = `/products/${product.id}/`;
+
+/** Falls back to a mailto naming the product, so a CTA always works. */
+const action =
+  ctaHref ?? `mailto:${site.email}?subject=${encodeURIComponent(title)}`;
+const actionLabel = ctaLabel ?? `Ask about the ${title}`;
+---
+
+{
+  variant === 'feature' ? (
+    <div class:list={['product product--feature', className]}>
+      <div class="product__body">
+        <p class="product__kicker">
+          <PixelIcon name={icon} size={18} />
+          {kickerText}
+        </p>
+        <h3 class="product__title">
+          <a href={href}>{title}</a>
+        </h3>
+        <p class="product__summary">{blurb ?? summary}</p>
+        {availability && <p class="product__availability">{availability}</p>}
+      </div>
+
+      <div class="product__aside">
+        {price && (
+          <p class="product__price">
+            {price}
+            {priceNote && <span class="product__priceNote">{priceNote}</span>}
+          </p>
+        )}
+        <Button href={action}>{actionLabel}</Button>
+        <a class="product__more" href={href}>
+          {moreLabel ?? 'What it covers'}
+        </a>
+      </div>
+    </div>
+  ) : (
+    <aside class:list={['product product--inline', className]}>
+      <p class="product__kicker">
+        <PixelIcon name={icon} size={16} />
+        {kickerText}
+      </p>
+      <h3 class="product__title product__title--inline">
+        <a href={href}>{title}</a>
+      </h3>
+      <p class="product__summary">{blurb ?? summary}</p>
+      <p class="product__meta">
+        {price && <span class="product__priceInline">{price}</span>}
+        <a href={href}>{moreLabel ?? 'Read more'}</a>
+      </p>
+    </aside>
+  )
+}
+
+<style>
+  /* Cream keeps literal colours in both themes — it is a brand surface. */
+  .product {
+    background: var(--tooltip-cream);
+    color: var(--dialup-midnight);
+    border: 2px solid var(--dialup-midnight);
+    border-radius: var(--radius-sm);
+  }
+
+  /* :not(.btn) matters — without it a primary button inside the card is
+     violet text on a violet background and its label disappears. */
+  .product a:not(.btn) {
+    color: var(--visited-link);
+  }
+
+  .product__kicker {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0 0 0.75rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--dialup-midnight);
+  }
+
+  .product__title {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    line-height: 1.1;
+    margin: 0 0 0.75rem;
+  }
+
+  .product__title a {
+    text-decoration: none;
+  }
+
+  .product__title a:hover {
+    text-decoration: underline;
+  }
+
+  .product__summary {
+    margin: 0;
+    text-wrap: pretty;
+  }
+
+  /* ---- feature ---- */
+
+  .product--feature {
+    box-shadow: var(--shadow-hard-md);
+    padding: 2.25rem 2rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+    gap: 1.5rem 3rem;
+    align-items: center;
+  }
+
+  .product--feature .product__title {
+    font-size: 2.25rem;
+  }
+
+  .product__availability {
+    margin: 1rem 0 0;
+    font-size: 0.9375rem;
+    color: var(--status-bar);
+  }
+
+  .product__aside {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    align-items: flex-start;
+  }
+
+  .product__price {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: 2.5rem;
+    line-height: 1;
+    margin: 0;
+  }
+
+  .product__priceNote {
+    display: block;
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: 1rem;
+    color: var(--status-bar);
+    margin-top: 0.35rem;
+  }
+
+  .product__more {
+    font-size: 0.9375rem;
+    font-weight: 600;
+  }
+
+  /* ---- inline ---- */
+
+  .product--inline {
+    padding: 1.25rem 1.5rem;
+    max-width: var(--measure-read);
+    margin-block: 2rem;
+  }
+
+  .product__title--inline {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .product--inline .product__summary {
+    font-size: 1rem;
+    line-height: 1.55;
+  }
+
+  .product__meta {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin: 0.9rem 0 0;
+    font-size: 0.9375rem;
+  }
+
+  .product__priceInline {
+    font-weight: 700;
+  }
+</style>

@@ -1,13 +1,13 @@
 ---
 import { getCollection, getEntry, render } from 'astro:content';
-import { Image } from 'astro:assets';
 
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Button from '../components/Button.astro';
 import PixelIcon from '../components/PixelIcon.astro';
+import ProductCard from '../components/ProductCard.astro';
 import Timestamp from '../components/Timestamp.astro';
-import { site } from '../data/site';
 import { resolveUpdated } from '../lib/last-updated';
+import { ctaHref } from '../lib/cta';
 
 const page = await getEntry('pages', 'home');
 if (!page) throw new Error('src/content/pages/home.md is missing.');
@@ -16,7 +16,19 @@ const { Content } = await render(page);
 const services = (await getCollection('services')).sort(
   (a, b) => a.data.order - b.data.order,
 );
-const work = (await getCollection('work')).sort((a, b) => b.data.year - a.data.year);
+const products = await getCollection('products');
+
+/** The home page names its featured product by slug in home.md. */
+const featuredSlug = page.data.sections?.product?.slug;
+const featured = featuredSlug
+  ? products.find((p) => p.id === featuredSlug)
+  : undefined;
+if (featuredSlug && !featured) {
+  throw new Error(
+    `home.md features product "${featuredSlug}", but no such file exists in ` +
+      `src/content/products/. Check the slug.`,
+  );
+}
 
 const { sections } = page.data;
 ---
@@ -39,12 +51,15 @@ const { sections } = page.data;
           (page.data.primaryCta || page.data.secondaryCta) && (
             <div class="hero__actions">
               {page.data.primaryCta && (
-                <Button href={page.data.primaryCta.href}>
+                <Button href={ctaHref(page.data.primaryCta.href)}>
                   {page.data.primaryCta.label}
                 </Button>
               )}
               {page.data.secondaryCta && (
-                <Button variant="secondary" href={page.data.secondaryCta.href}>
+                <Button
+                  variant="secondary"
+                  href={ctaHref(page.data.secondaryCta.href)}
+                >
                   {page.data.secondaryCta.label}
                 </Button>
               )}
@@ -56,7 +71,12 @@ const { sections } = page.data;
       <aside class="hero__aside">
         {page.data.tagline && <p class="tagline">{page.data.tagline}</p>}
         <p class="small">
-          Strategy &middot; Design &middot; Marketing<br />
+          {page.data.heroMeta?.map((line) => (
+            <>
+              {line}
+              <br />
+            </>
+          ))}
           <Timestamp date={resolveUpdated(page.data.updated, page.filePath)} />
         </p>
       </aside>
@@ -70,8 +90,15 @@ const { sections } = page.data;
       <section class="section">
         <div class="section__head">
           <h2>{sections.services.heading}</h2>
-          {sections.services.intro && <p class="small">{sections.services.intro}</p>}
+          {sections.services.link && (
+            <a href={ctaHref(sections.services.link.href)}>
+              {sections.services.link.label}
+            </a>
+          )}
         </div>
+        {sections.services.intro && (
+          <p class="small measure intro">{sections.services.intro}</p>
+        )}
 
         <div class="cards">
           {services.map((service) => (
@@ -91,34 +118,15 @@ const { sections } = page.data;
   <hr />
 
   {
-    sections?.work && work.length > 0 && (
+    sections?.product && featured && (
       <section class="section">
         <div class="section__head">
-          <h2>{sections.work.heading}</h2>
-          {sections.work.linkLabel && <a href="/work/">{sections.work.linkLabel}</a>}
+          <h2>{sections.product.heading}</h2>
         </div>
-        {sections.work.intro && <p class="small measure">{sections.work.intro}</p>}
-
-        <div class="work-list">
-          {work.slice(0, 3).map((entry) => (
-            <a class="work-item" href={`/work/${entry.id}/`}>
-              <Image
-                src={entry.data.cover}
-                alt=""
-                width={320}
-                height={240}
-                class="work-item__cover"
-              />
-              <span class="work-item__text">
-                <span class="work-item__title">{entry.data.title}</span>
-                <span class="work-item__summary">{entry.data.summary}</span>
-                <span class="small">
-                  {entry.data.client ?? 'Studio project'} &middot; {entry.data.year}
-                </span>
-              </span>
-            </a>
-          ))}
-        </div>
+        {sections.product.intro && (
+          <p class="small measure intro">{sections.product.intro}</p>
+        )}
+        <ProductCard product={featured} variant="feature" />
       </section>
     )
   }
@@ -132,8 +140,16 @@ const { sections } = page.data;
             {sections.contact.intro && <p class="measure">{sections.contact.intro}</p>}
           </div>
           <div class="callout__actions">
-            <Button href={`mailto:${site.email}`}>Email the studio</Button>
-            <a href="/contact/">Or see what to include</a>
+            {sections.contact.primaryCta && (
+              <Button href={ctaHref(sections.contact.primaryCta.href)}>
+                {sections.contact.primaryCta.label}
+              </Button>
+            )}
+            {sections.contact.secondaryCta && (
+              <a href={ctaHref(sections.contact.secondaryCta.href)}>
+                {sections.contact.secondaryCta.label}
+              </a>
+            )}
           </div>
         </div>
       </section>
@@ -226,55 +242,21 @@ const { sections } = page.data;
     line-height: 1.55;
   }
 
-  .work-list {
-    display: flex;
-    flex-direction: column;
-    margin-top: 1.5rem;
-  }
+  
 
-  .work-item {
-    display: grid;
-    grid-template-columns: minmax(0, 14rem) minmax(0, 1fr);
-    gap: 1rem 2rem;
-    padding: 1.5rem 0;
-    border-top: 1px solid var(--rule);
-    text-decoration: none;
-    color: var(--text);
-    align-items: start;
-  }
+  
 
-  .work-item:last-child {
-    border-bottom: 1px solid var(--rule);
-  }
+  
 
-  .work-item__cover {
-    border: 2px solid var(--dialup-midnight);
-    border-radius: var(--radius-md);
-    width: 100%;
-    height: auto;
-  }
+  
 
-  .work-item__text {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-  }
+  
 
-  .work-item__title {
-    font-family: var(--font-serif);
-    font-weight: 500;
-    font-size: 1.6rem;
-    line-height: 1.2;
-  }
+  
 
-  .work-item:hover .work-item__title {
-    text-decoration: underline;
-  }
+  
 
-  .work-item__summary {
-    font-size: 1rem;
-    line-height: 1.5;
-  }
+  
 
   /* Cream callout keeps literal colours in both themes. */
   .callout {
@@ -317,8 +299,5 @@ const { sections } = page.data;
       padding-top: 1.25rem;
     }
 
-    .work-item {
-      grid-template-columns: minmax(0, 1fr);
-    }
   }
 </style>

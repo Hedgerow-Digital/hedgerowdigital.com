@@ -6,7 +6,10 @@ import PortableText from '../../components/PortableText.astro';
 import WindowFrame from '../../components/WindowFrame.astro';
 import WebRing from '../../components/WebRing.astro';
 import Timestamp from '../../components/Timestamp.astro';
+import ProductCard from '../../components/ProductCard.astro';
 import { getFieldNotes, noteDate, type FieldNote } from '../../lib/sanity';
+import { getCollection } from 'astro:content';
+import { defaultProductSlug } from '../../data/site';
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const notes = await getFieldNotes();
@@ -31,6 +34,10 @@ interface Props {
 
 const { note, prev, next } = Astro.props;
 const published = noteDate(note);
+
+const product = defaultProductSlug
+  ? (await getCollection('products')).find((p) => p.id === defaultProductSlug)
+  : undefined;
 
 const description =
   note.seo?.description ?? note.excerpt ?? `A field note from Hedgerow Digital.`;
@@ -74,6 +81,8 @@ const description =
     }
 
     <PortableText blocks={note.body} class="body" />
+
+    {product && <ProductCard product={product} variant="inline" />}
 
     {
       note.author?.bio && (

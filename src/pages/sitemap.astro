@@ -51,6 +51,7 @@ function formatDate(date: Date | undefined): string {
 }
 
 const services = await getCollection('services');
+const productEntries = await getCollection('products');
 const work = await getCollection('work');
 
 const pageRows: Row[] = [
@@ -83,6 +84,16 @@ const dirRows: Row[] = [
       .sort((a, b) => b.getTime() - a.getTime())[0],
     size: '-',
   },
+  {
+    name: 'products/',
+    href: '/products/',
+    icon: 'folder',
+    modified: productEntries
+      .map((p) => statContent(`products/${p.id}.mdx`).modified)
+      .filter((d): d is Date => !!d)
+      .sort((a, b) => b.getTime() - a.getTime())[0],
+    size: '-',
+  },
   { name: 'field-notes/', href: '/field-notes/', icon: 'folder', modified: undefined, size: '-' },
 ];
 
@@ -98,6 +109,19 @@ const serviceRows: Row[] = services
     return {
       name: `${s.id}.html`,
       href: `/services/${s.id}/`,
+      icon: 'page' as const,
+      modified,
+      size: formatSize(size),
+    };
+  });
+
+const productRows: Row[] = productEntries
+  .sort((a, b) => a.data.order - b.data.order)
+  .map((p) => {
+    const { modified, size } = statContent(`products/${p.id}.mdx`);
+    return {
+      name: `${p.id}.html`,
+      href: `/products/${p.id}/`,
       icon: 'page' as const,
       modified,
       size: formatSize(size),
@@ -149,6 +173,35 @@ const workRows: Row[] = work.map((w) => {
               ))
             }
 
+            <tr><td colspan="3"><hr /></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Index of /products/</h2>
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Name</th>
+              <th scope="col">Last modified</th>
+              <th scope="col">Size</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="3"><hr /></td></tr>
+            {
+              productRows.map((row) => (
+                <tr>
+                  <td>
+                    <PixelIcon name={row.icon} size={16} />
+                    <a href={row.href}>{row.name}</a>
+                  </td>
+                  <td>{formatDate(row.modified)}</td>
+                  <td>{row.size}</td>
+                </tr>
+              ))
+            }
             <tr><td colspan="3"><hr /></td></tr>
           </tbody>
         </table>
