@@ -30,3 +30,12 @@ Design_Mockups/
 Design Reference*/
 Design_Reference*/
 
+# PDF build scratch
+.docs-tmp/
+
+# Generated guides. Source of truth is the .md files;
+# rebuild with `npm run docs`.
+docs/*.pdf
+
+# Local Claude Code settings
+.claude/settings.local.json
